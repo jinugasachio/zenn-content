@@ -254,6 +254,10 @@ runs:
 - CI からクラウドへの認証は OIDC の利用を当たり前としていきたい
 - コンソールから都度設定するのは手間なので、社内で統一していくには[こういった Terraform module](https://github.com/terraform-google-modules/terraform-google-github-actions-runners/tree/master/modules/gh-oidc) を利用 or 作成したい
 
+# 最後に
+- 株式会社 Gincoではブロックチェーンを学びたい方、ウォレットについて詳しくなりたい方を募集していますので下記リンクから是非ご応募ください。
+- [株式会社Ginco の求人一覧](https://herp.careers/v1/ginco)
+
 # 参考
 https://cloud.google.com/blog/ja/products/identity-security/enabling-keyless-authentication-from-github-actions
 https://cloud.google.com/iam/docs/configuring-workload-identity-federation?hl=ja#github-actions
