@@ -78,24 +78,6 @@ published: false
 ![](/images/ga_oidc_to_gcp/tejyun14.png)
 
 # Github Actions の実装
-## ポイントと解説
-- `main` ブランチに `v` で始まるタグがプッシュされるとワークフローが実行される
-- OIDC 利用には `permissions` に `id-token: write` が必要
-- 下記の`最終的なワークフロー`は本番環境用だが [reusable workflow](https://docs.github.com/en/actions/using-workflows/reusing-workflows) と [composite action](https://docs.github.com/ja/actions/creating-actions/creating-a-composite-action) を利用し他環境用にも再利用できるようにている
-- `docker/setup-buildx-action@v2` で `docker/build-push-action@v4` においてキャッシュを使えるようにする
-- OIDC トークンの発行は `google-github-actions/auth@v1` で行われている
-  - `OIDC の設定手順`で作成した workload identity provider のプリンシパルを指定
-  - `OIDC の設定手順`で作成した service account のアドレスを指定
-- `docker/login-action@v2` でOIDC トークンを使って GCR へ認証
-- `docker/metadata-action@v4` でイメージのタグを出力
-  - `type=semver,pattern={{raw}}` で 例えば Github 上で `v1.2` というタグがプッシュされた時に同じタグを出力する
-  - `type=sha,format=short` で git の short sha をタグとして出力する
-- `docker/build-push-action@v4` でイメージのビルドとプッシュ
-  - 2023年9月時点で [Experimental となっている](https://docs.docker.com/build/ci/github-actions/cache/)が `type=gha` として Github Action のキャッシュを利用
-  - `mode=max` として全ての中間レイヤーもキャッシュさせる。デフォルトは `min` であり最終イメージのレイヤーしかキャッシュされない
-  - `provenance: false` [こちらの問題](https://github.com/docker/build-push-action/issues/767)を防ぐために指定が必要でした
-
-
 ## 最終的なワークフロー
 
 ```yml:.github/workflows/build-push-prd.yml
@@ -248,7 +230,24 @@ runs:
         cache-to: type=gha,mode=max
         provenance: false
 ```
-
+## ポイントと解説
+- `main` ブランチに `v` で始まるタグが `push` されるとワークフローが実行される
+- OIDC 利用には `permissions` に `id-token: write` が必要
+- 下記の`最終的なワークフロー`は本番環境用だが [reusable workflow](https://docs.github.com/en/actions/using-workflows/reusing-workflows) と [composite action](https://docs.github.com/ja/actions/creating-actions/creating-a-composite-action) を利用することで他環境用にも再利用可能
+- `docker/setup-buildx-action@v2` で `docker/build-push-action@v4` においてキャッシュを使えるようにする
+- OIDC トークンの発行は `google-github-actions/auth@v1` で行われている
+  - `OIDC の設定手順`で作成した workload identity provider のプリンシパルを指定
+    - `projects/プロジェクトID/locations/global/workloadIdentityPools/作成したpoolのID/providers/作成したプロバイダ名`
+  - `OIDC の設定手順`で作成した service account のアドレスを指定
+    - `github-actions@test-example-123456.iam.gserviceaccount.com`
+- `docker/login-action@v2` でOIDC トークンを使って GCR へ認証
+- `docker/metadata-action@v4` でイメージのタグを出力
+  - `type=semver,pattern={{raw}}` で 例えば Github 上で `v1.2` というタグがプッシュされた時に同じタグを出力する
+  - `type=sha,format=short` で git の short sha をタグとして出力する
+- `docker/build-push-action@v4` でイメージのビルドとプッシュ
+  - 2023年9月時点で [Experimental となっている](https://docs.docker.com/build/ci/github-actions/cache/)が `type=gha` として Github Action のキャッシュを利用
+  - `mode=max` として全ての中間レイヤーもキャッシュさせる。デフォルトは `min` であり最終イメージのレイヤーしかキャッシュされない
+  - `provenance: false` [こちらの問題](https://github.com/docker/build-push-action/issues/767)を防ぐために指定が必要でした
 
 # 所感
 - CI からクラウドへの認証は OIDC の利用を当たり前としていきたい
