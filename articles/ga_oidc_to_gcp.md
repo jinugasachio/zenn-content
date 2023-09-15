@@ -19,11 +19,68 @@ published: false
 - `最終的なワークフロー` にある `docker/login-action@v3` の `registry` に渡す値を任意の Artifact Registryのホストに変えればそのまま転用できると思います
 
 # OIDC の設定手順
-### 1. 
+## 1. Workload Identity のプールとプロバイダを作成
+- `IAMと管理` > `Workload Identity 連携` をクリック
+![](/images/ga_oidc_to_gcp/tejyun1.png)
+
+- `プールを作成` にアクセス。任意の名前を入力し、`続行` をクリック
+![](/images/ga_oidc_to_gcp/tejyun2.png)
+
+- `OpenID Connect（OIDC）` を選択
+- 任意のプロバイダ名を入力
+- `発行元（URL）`には `https://token.actions.githubusercontent.com` を入力
+- `デフォルトのオーディエンス`を選択
+![](/images/ga_oidc_to_gcp/tejyun3.png)
+
+- 以下のように属性をマッピングし、`保存`をクリック
+  - `google.subject`       => `assertion.sub`
+  - `attribute.repository` => `assertion.repository`
+  - `attribute.actor`      =>	`assertion.actor`
+![](/images/ga_oidc_to_gcp/tejyun4.png)
+
+## 2. Github Actions から利用するサービスアカウントの作成
+- `IAMと管理` > `サービスアカウント` をクリック
+![](/images/ga_oidc_to_gcp/tejyun5.png)
+
+- `サービスアカウントを作成`をクリック
+![](/images/ga_oidc_to_gcp/tejyun6.png)
+
+- 任意の`サービスアカウント名`を入力し、`作成して続行`をクリック
+![](/images/ga_oidc_to_gcp/tejyun7.png)
+
+- サービスアカウントに`ストレージ管理者`のロールを付与し、`完了` をクリック
+![](/images/ga_oidc_to_gcp/tejyun8.png)
+
+
+
+## 3. Github Actions にサービスアカウントの権限借用を許可する
+- `IAMと管理` > `サービスアカウント` をクリック
+![](/images/ga_oidc_to_gcp/tejyun5.png)
+
+- 作成したサービスアカウントをクリック
+![](/images/ga_oidc_to_gcp/tejyun10.png)
+
+- `権限`をクリック
+![](/images/ga_oidc_to_gcp/tejyun11.png)
+
+- `アクセス権を付与`をクリック
+![](/images/ga_oidc_to_gcp/tejyun12.png)
+
+- 以下のフォーマットで`新しいプリンシパル`を入力、`ロール`は `Workload Identity ユーザー`を選択
+  ```
+  principalSet://iam.googleapis.com/projects/{GCPプロジェクトのID}/locations/global/workloadIdentityPools/{作成したプールのID}/attribute.repository/{Githubのユーザー名}/{リポジトリ名}
+  ```
+![](/images/ga_oidc_to_gcp/tejyun13.png)
+
+- `プールの詳細`画面にて`接続済サービスアカウント`に作成したサービスアカウントが表示されていれば OK
+  - 反映まで数秒時差があります
+  - 表示されない場合、`新しいプリンシパル`の値が間違っている可能性があります
+![](/images/ga_oidc_to_gcp/tejyun14.png)
 
 # ワークフローの実装
 ## ポイントと解説
 - `main` ブランチに `v` で始まるタグがプッシュされるとワークフローが実行される
+- OIDC 利用には `permissions` に `id-token: write` が必要
 - 下記の`最終的なワークフロー`は本番環境用だが [reusable workflow](https://docs.github.com/en/actions/using-workflows/reusing-workflows) と [composite action](https://docs.github.com/ja/actions/creating-actions/creating-a-composite-action) を利用し他環境用にも再利用できるようにている
 - `docker/setup-buildx-action@v2` で `docker/build-push-action@v4` においてキャッシュを使えるようにする
 - OIDC トークンの発行は `google-github-actions/auth@v1` で行われている
@@ -200,5 +257,5 @@ runs:
 # 参考
 https://cloud.google.com/blog/ja/products/identity-security/enabling-keyless-authentication-from-github-actions
 https://cloud.google.com/iam/docs/configuring-workload-identity-federation?hl=ja#github-actions
-https://github.com/terraform-google-modules/terraform-google-github-actions-runners/tree/master/modules/gh-oidc
+https://cloud.google.com/iam/docs/workload-identity-federation-with-other-providers?hl=ja
 https://docs.github.com/ja/actions/deployment/security-hardening-your-deployments/configuring-openid-connect-in-google-cloud-platform
