@@ -77,7 +77,7 @@ published: false
   - 表示されない場合、`新しいプリンシパル`の値が間違っている可能性があります
 ![](/images/ga_oidc_to_gcp/tejyun14.png)
 
-# ワークフローの実装
+# Github Actions の実装
 ## ポイントと解説
 - `main` ブランチに `v` で始まるタグがプッシュされるとワークフローが実行される
 - OIDC 利用には `permissions` に `id-token: write` が必要
