@@ -13,11 +13,6 @@ published: false
 - OIDC を利用することで Github にクレデンシャルを渡す必要がなくなり、よりセキュアな運用が可能になります
 - コンソールから行う OIDC の設定手順と実装したワークフローが書いてあります 
 
-# 注意事項
-- Google Container Registry は [2024年5月15日以降にサポートが終了します](https://cloud.google.com/container-registry/docs/deprecations/container-registry-deprecation?hl=ja)
-- 特別な事情がない限りは [Artifact Registry](https://cloud.google.com/artifact-registry/docs/overview?hl=ja) を代わりに使用してください
-- `最終的なワークフロー` にある `docker/login-action@v3` の `registry` に渡す値を任意の Artifact Registryのホストに変えればそのまま転用できると思います
-
 # OIDC の設定手順
 ## 1. Workload Identity のプールとプロバイダを作成
 - `IAMと管理` > `Workload Identity 連携` をクリック
@@ -252,6 +247,11 @@ runs:
 # 所感
 - CI からクラウドへの認証は OIDC の利用を当たり前としていきたい
 - コンソールから都度設定するのは手間なので、社内で統一していくには[こういった Terraform module](https://github.com/terraform-google-modules/terraform-google-github-actions-runners/tree/master/modules/gh-oidc) を利用 or 作成したい
+
+# 注意事項
+- Google Container Registry は [2024年5月15日以降にサポートが終了します](https://cloud.google.com/container-registry/docs/deprecations/container-registry-deprecation?hl=ja)
+- 特別な事情がない限りは [Artifact Registry](https://cloud.google.com/artifact-registry/docs/overview?hl=ja) を代わりに使用してください
+- `最終的なワークフロー` にある `docker/login-action@v3` の `registry` に渡す値を任意の Artifact Registryのホストに変えればそのまま転用できると思います
 
 # 最後に
 - 株式会社 Gincoではブロックチェーンを学びたい方、ウォレットについて詳しくなりたい方を募集していますので下記リンクから是非ご応募ください。
