@@ -3,7 +3,7 @@ title: "Github Actions から OIDC で Google Container Registry にイメージ
 emoji: "🔒"
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["GCP", "GithubActions", "Docker"]
-published: false
+published: true
 ---
 
 この記事は[株式会社Gincoのテックブログ](https://tech.ginco.co.jp/)として書いています。
