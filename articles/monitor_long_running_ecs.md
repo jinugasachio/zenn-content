@@ -3,7 +3,7 @@ title: "一定時間以上稼働している ECS タスクを検知する"
 emoji: "🕵️" 
 type: "tech" # tech: 技術記事 / idea: アイデア
 topics: ["aws", "ecs", "datadog"]
-published: false
+published: true
 publication_name: "atamaplus"
 ---
 
